@@ -4,12 +4,12 @@
 #include <queue>
 #include "LRUQueue.h"
 
-#define DEF_LRU_CAPACITY 1024
+#define DEF_LFU_CAPACITY 1024
 
 template<typename KeyType>
 class LFU {
 public:
-    explicit LFU(const size_t capacity) : _capacity(capacity), _filled(0) {}
+    explicit LFU(const size_t capacity = DEF_LFU_CAPACITY) : _capacity(capacity), _filled(0) {}
 
     ~LFU() = default;
 

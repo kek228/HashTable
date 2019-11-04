@@ -8,10 +8,10 @@ set(gtest_SOURCE_DIR /Users/nikita/CLionProjects/googletest)
 include_directories(${gtest_SOURCE_DIR}/googletest/include)
 link_directories(${gtest_SOURCE_DIR}/build/lib)
 
-set(TABLE HashTableWithAnalyser.h HashTable.h LFU.h LRUQueue.h)
+set(TABLE_SRC HashTableWithAnalyser.h HashTable.h LFU.h LRUQueue.h)
 
 
-add_executable( main main.cpp ${TABLE})
-add_executable( TEST_HASH testTable.cpp ${TABLE})
-add_executable( TEST_LFU testLFU.cpp ${TABLE})
+add_executable( main main.cpp ${TABLE_SRC})
+add_executable( TEST_HASH testTable.cpp ${TABLE_SRC})
+add_executable( TEST_LFU testLFU.cpp ${TABLE_SRC})
 
