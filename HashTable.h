@@ -33,7 +33,7 @@ struct Entry {
     bool _free;
 };
 
-#define DEF_CAPACITY 2
+#define DEF_CAPACITY 16
 #define DEF_REHASH_FACTOR 0.5
 
 template<typename KeyType, typename ValType>

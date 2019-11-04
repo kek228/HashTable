@@ -8,7 +8,7 @@ class HashTableWithAnalyser: public HashTable<KeyType, ValType>{
 public:
     explicit HashTableWithAnalyser( const size_t capacity = DEF_CAPACITY
                                     , const double rehashFactor = DEF_REHASH_FACTOR
-                                    , const size_t cacheCapacity = DEF_LRU_CAPACITY) :
+                                    , const size_t cacheCapacity = DEF_LFU_CAPACITY) :
                                     HashTableWithAnalyser::HashTable(capacity, rehashFactor)
                                     , _keysCache(cacheCapacity)
                                     {}

@@ -4,8 +4,17 @@
 #include "HashTable.h"
 using namespace std;
 
+TEST(HashTableTests, trivialInt){
+    HashTable<int, int> testTable;
+    int key = 1;
+    int val = 2;
+    testTable.insert(key, val);
+    auto res = testTable.get(key);
+    ASSERT_EQ(*res, val);
+}
 
 TEST(HashTableTests, trivial) {
+    ASSERT_EQ(1,1);
     HashTable<string, string> testTable;
     vector<string> testStrings = {
             "aaaaaaa",

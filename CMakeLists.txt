@@ -15,3 +15,5 @@ add_executable( main main.cpp ${TABLE_SRC})
 add_executable( TEST_HASH testTable.cpp ${TABLE_SRC})
 add_executable( TEST_LFU testLFU.cpp ${TABLE_SRC})
 
+target_link_libraries(TEST_HASH gtest gtest_main)
+target_link_libraries(TEST_LFU gtest gtest_main)
