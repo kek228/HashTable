@@ -61,11 +61,7 @@ private:
         counterQueue->second.insert(item);
     }
 
-    template<typename KEY>
-    void _eraseKey(KEY &&item) {
-
-    }
-
+private:
     size_t _capacity;
     size_t _filled;
     std::unordered_map<KeyType, size_t> _keyToCounter;

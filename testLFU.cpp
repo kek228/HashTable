@@ -42,7 +42,7 @@ TEST(LFUTests, sameKeyTest) {
     auto counter3 = keys.find(3);
     ASSERT_EQ(counter3->second.size(), 1);
     ASSERT_EQ(counter3->second[0], "aaa");
-//    //
+    //
     lfu.insert("bbb");
     lfu.insert("bbb");
     keys = lfu.topKeys();
@@ -50,13 +50,10 @@ TEST(LFUTests, sameKeyTest) {
     auto counter2 = keys.find(2);
     ASSERT_EQ(counter2->second.size(), 1);
     ASSERT_EQ(counter2->second[0], "bbb");
-    //
+
+    // Должен быть удален ключ bbb с частотой 2
     lfu.insert("ccc");
     keys = lfu.topKeys();
-    for (auto &k: keys) {
-        cout << k.first;
-    }
-
     ASSERT_EQ(keys.size(), 2);
     auto counter1 = keys.find(1);
     ASSERT_EQ(counter1->second.size(), 1);
@@ -67,5 +64,4 @@ TEST(LFUTests, sameKeyTest) {
     counter3 = keys.find(3);
     ASSERT_EQ(counter3->second.size(), 1);
     ASSERT_EQ(counter3->second[0], "aaa");
-
 }
