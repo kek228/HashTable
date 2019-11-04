@@ -7,22 +7,40 @@ template <typename KeyType, typename ValType>
 struct Entry{
     enum class STATE{FREE, DEL, FILLED};
 
-    Entry():key{}, value{}, STATE(STATE::FREE){}
-    KeyType key;
-    ValType value;
-    STATE STATE;
+    Entry(): _key{}, _value{}, _state(STATE::FREE){}
+
+    Entry(const KeyType &key, const ValType &value, const STATE &state):
+            _key(key), _value(value), _state(state){}
+
+
+    Entry& operator = (const Entry& entry){
+        _key = entry._key;
+        _value = entry._value;
+        _state = entry._state;
+    }
+
+    Entry& operator = (Entry&& entry) noexcept {
+        _key = entry._key;
+        _value = entry._value;
+        _state = entry._state;
+    }
+
     bool free() const{
-        return STATE == STATE::FREE;
+        return _state == STATE::FREE;
     }
     bool deleted() const{
-        return STATE == STATE::DEL;
+        return _state == STATE::DEL;
     }
     bool filled() const{
-        return STATE == STATE::FILLED;
+        return _state == STATE::FILLED;
     }
+
+    KeyType _key;
+    ValType _value;
+    STATE _state;
 };
 
-#define DEF_CAPACITY 16
+#define DEF_CAPACITY 2
 #define DEF_REHASH_FACTOR 0.5
 
 template <typename KeyType, typename ValType>
@@ -45,15 +63,13 @@ public:
         int iter = 0;
         int index = _hash(key, iter) % _capacity;
         if(!_ithPos(index).filled()){
-            _table.get()[index].value = value;
+            _ithPos(index) = {key, value, _Entry::STATE::FILLED};
         }
         else {
-            while (_ithPos(index).filled()) {
+            while (_ithPos(index).filled()){
                 index = _hash(key, ++iter) % _capacity;
             }
-            _table.get()[index].key = key;
-            _table.get()[index].value = value;
-            _table.get()[index].STATE = _Entry::STATE::FILLED;
+            _ithPos(index) = {key, value, _Entry::STATE::FILLED};
         }
         ++_filled;
     }
@@ -64,7 +80,7 @@ public:
         if(!entry.filled())
             return nullptr;
         std::unique_ptr<ValType> res(new ValType);
-        *res = entry.value;
+        *res = entry._value;
         return res;
     }
 
@@ -72,7 +88,7 @@ public:
         size_t index = _search(key);
         _Entry &entry =  _ithPos(index);
         if(entry.filled()){
-            entry.STATE = _Entry::STATE::DEL;
+            entry._state = _Entry::STATE::DEL;
             --_filled;
         }
     }
@@ -82,10 +98,10 @@ private:
     size_t _search(const KeyType &key){
         int iter = 0;
         int index = _hash(key, iter) % _capacity;
-        if(_ithPos(index).free() || _ithPos(index).key == key)
+        if(_ithPos(index).free() || _ithPos(index)._key == key)
             return index;
 
-        while(!_ithPos(index).free() || _ithPos(index).key != key){
+        while(!_ithPos(index).free() || _ithPos(index)._key != key){
             index = _hash(key, ++iter) % _capacity;
         }
         return index;
@@ -107,7 +123,7 @@ private:
         for(size_t i = 0; i < _capacity; ++i){
             const auto &oldVal = oldTable.get()[i];
             if(oldVal.filled())
-                insert(oldVal.key, oldVal.value);
+                insert(oldVal._key, oldVal._value);
         }
     }
 
