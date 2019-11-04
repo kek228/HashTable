@@ -6,11 +6,22 @@ using namespace std;
 
 TEST(HashTableTests, trivialInt){
     HashTable<int, int> testTable;
-    int key = 1;
-    int val = 2;
-    testTable.insert(key, val);
-    auto res = testTable.get(key);
-    ASSERT_EQ(*res, val);
+    testTable.insert(1, 1);
+    testTable.insert(2, 2);
+    auto res = testTable.get(1);
+    ASSERT_EQ(*res, 1);
+    //
+    res = testTable.get(3);
+    ASSERT_EQ(res, nullptr);
+    //
+    testTable.insert(2, 1);
+    res = testTable.get(2);
+    ASSERT_EQ(*res, 1);
+    //
+    testTable.erase(2);
+    res = testTable.get(2);
+    ASSERT_EQ(res, nullptr);
+
 }
 
 TEST(HashTableTests, trivial) {
@@ -39,7 +50,7 @@ TEST(HashTableTests, trivial) {
 }
 
 TEST(HashTableTests, delTest) {
-    HashTable<string, string> testTable;
+    HashTable<string, string> testTable(2);
     vector<string> testStrings = {
             "aaaaaaa",
             "bbbbbbb",

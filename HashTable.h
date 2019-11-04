@@ -4,10 +4,11 @@
 
 template<typename KeyType, typename ValType>
 struct Entry {
-    Entry() : _key{}, _value{}, _free(true) {}
+    enum class STATE{EMPTY, DEL, FILLED};
+    Entry() : _key{}, _value{}, _state(STATE::EMPTY) {}
 
-    Entry(const KeyType &key, const ValType &value, const bool free) :
-            _key(key), _value(value), _free(free) {}
+    Entry(const KeyType &key, const ValType &value, STATE state) :
+            _key(key), _value(value), _state(state) {}
 
 
     Entry(const Entry &) = default;
@@ -17,20 +18,33 @@ struct Entry {
     Entry &operator=(const Entry &entry) {
         _key = entry._key;
         _value = entry._value;
-        _free = entry._free;
+        _state = entry._state;
         return *this;
     }
 
     Entry &operator=(Entry &&entry) noexcept {
         _key = entry._key;
         _value = entry._value;
-        _free = entry._free;
+        _state = entry._state;
         return *this;
     }
 
+    bool deleted(){
+        return _state == STATE::DEL;
+    }
+
+    bool empty(){
+        return _state == STATE::EMPTY;
+    }
+
+    bool filled(){
+        return _state == STATE::FILLED;
+    }
+
+
     KeyType _key;
     ValType _value;
-    bool _free;
+    STATE _state;
 };
 
 #define DEF_CAPACITY 16
@@ -55,37 +69,46 @@ public:
     void insert(KEY &&key, VAL &&value) {
         if (static_cast<double>(_filled) / _capacity >= _rehashFactor)
             _rehash();
-        int iter = 0;
-        int index = _hash(key, iter) % _capacity;
-        if (_ithPos(index)._free) {
-            _ithPos(index) = {key, value, false};
-        } else {
-            while (!_ithPos(index)._free) {
-                index = _hash(key, ++iter) % _capacity;
-            }
-            _ithPos(index) = {key, value, false};
+        size_t iter = 0;
+        size_t index = _hash(key, iter) % _capacity;
+        while (!_ithPos(index).empty() && !_ithPos(index).deleted() && _ithPos(index)._key != key) {
+            index = _hash(key, ++iter) % _capacity;
         }
-        ++_filled;
+
+        if(_ithPos(index).deleted() || _ithPos(index).empty()){
+            ++_filled;
+        }
+        _ithPos(index) = {key, value, _Entry::STATE::FILLED};
     }
 
     template<typename KEY>
     std::unique_ptr<ValType> get(KEY &&key) {
-        size_t index = _search(std::forward<KEY>(key));
-        const _Entry &entry = _ithPos(index);
-        if (entry._free)
-            return nullptr;
-        std::unique_ptr<ValType> res(new ValType);
-        *res = entry._value;
-        return res;
+        size_t iter = 0;
+        size_t index = _hash(key, iter) % _capacity;
+        while(!_ithPos(index).empty()){
+            if(_ithPos(index)._key == key){
+                if(_ithPos(index).deleted())
+                    return nullptr;
+                std::unique_ptr<ValType> res(new ValType);
+                *res = _ithPos(index)._value;
+                return res;
+            }
+            index = _hash(key, ++iter) % _capacity;
+        }
+        return nullptr;
     }
 
     template<typename KEY>
     void erase(KEY &&key) {
-        size_t index = _search(std::forward<KEY>(key));
-        _Entry &entry = _ithPos(index);
-        if (!entry._free) {
-            entry._free = true;
-            --_filled;
+        size_t iter = 0;
+        size_t index = _hash(key, iter) % _capacity;
+
+        while(!_ithPos(index).empty()){
+            if(_ithPos(index)._key == key){
+                _ithPos(index)._state = _Entry::STATE::DEL;
+                break;
+            }
+            index = _hash(key, ++iter) % _capacity;
         }
     }
 
@@ -94,23 +117,11 @@ public:
     }
 
 private:
-    template<typename KEY>
-    size_t _search(KEY &&key) {
-        int iter = 0;
-        int index = _hash(key, iter) % _capacity;
-        if (_ithPos(index)._free || _ithPos(index)._key == key)
-            return index;
-        while (!_ithPos(index)._free && _ithPos(index)._key != key) {
-            index = _hash(key, ++iter) % _capacity;
-        }
-        return index;
-    }
-
     _Entry &_ithPos(const size_t i) {
         return _table.get()[i];
     }
 
-    int _hash(const KeyType &key, const int iter) {
+    size_t _hash(const KeyType &key, const size_t iter) {
         return (std::hash<KeyType>{}(key) + iter + iter * iter);
     }
 
@@ -122,8 +133,8 @@ private:
         _table.reset(new _Entry[_capacity]);
 
         for (size_t i = 0; i < _oldCapacity; ++i) {
-            const auto &oldVal = oldTable.get()[i];
-            if (!oldVal._free)
+            auto &oldVal = oldTable.get()[i];
+            if (oldVal.filled())
                 insert(oldVal._key, oldVal._value);
         }
     }
