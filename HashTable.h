@@ -80,7 +80,7 @@ public:
     void erase(const KeyType &key){
         size_t index = _search(key);
         _Entry &entry =  _ithPos(index);
-        if(entry.filled()){
+        if(!entry._free){
             entry._free = true;
             --_filled;
         }
