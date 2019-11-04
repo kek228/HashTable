@@ -24,6 +24,7 @@ TEST(HashTableTests, trivial) {
         testTable.insert(s, s);
 
     for(auto &str: testStrings){
+        cout<<str.data()<<endl;
         auto val = testTable.get(str);
         ASSERT_EQ(str, *val);
     }

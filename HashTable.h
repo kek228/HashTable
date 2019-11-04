@@ -1,6 +1,7 @@
 #pragma once
 
 #include <unordered_set>
+#include <iostream>
 #include <memory>
 
 template <typename KeyType, typename ValType>
@@ -17,12 +18,14 @@ struct Entry{
         _key = entry._key;
         _value = entry._value;
         _state = entry._state;
+        return *this;
     }
 
     Entry& operator = (Entry&& entry) noexcept {
         _key = entry._key;
         _value = entry._value;
         _state = entry._state;
+        return *this;
     }
 
     bool free() const{
@@ -58,7 +61,7 @@ public:
     ~HashTable() = default;
 
     void insert(const KeyType &key, const ValType &value){
-        if(static_cast<double>(_filled) / _capacity > _rehashFactor)
+        if(static_cast<double>(_filled) / _capacity >= _rehashFactor)
             _rehash();
         int iter = 0;
         int index = _hash(key, iter) % _capacity;
@@ -100,8 +103,7 @@ private:
         int index = _hash(key, iter) % _capacity;
         if(_ithPos(index).free() || _ithPos(index)._key == key)
             return index;
-
-        while(!_ithPos(index).free() || _ithPos(index)._key != key){
+        while(!_ithPos(index).free() && _ithPos(index)._key != key){
             index = _hash(key, ++iter) % _capacity;
         }
         return index;
@@ -117,6 +119,7 @@ private:
 
     void _rehash(){
         _capacity *= 2;
+        _filled = 0;
         auto oldTable = std::move(_table);
         _table.reset(new _Entry[_capacity]);
 
