@@ -14,27 +14,30 @@ public:
 
     template<typename KEY>
     void insert(KEY &&item) {
-        auto valCounter = _counterMap.find(item);
-        if (valCounter == _counterMap.end()) {
-            _counterMap[item] = 1;
-            _insertToQueues(1, item);
+        auto keyCounter = _keyToCounter.find(item);
+        if (keyCounter == _keyToCounter.end()) {
             ++_filled;
+            if (_filled > _capacity) {
+                // удалим самый поздний элемент из самого не частого счетчика
+                auto leastFreqEls = _countersQueues.begin();
+                auto keyToErase = leastFreqEls->second.pop();
+                _keyToCounter.erase(keyToErase);
+                if (leastFreqEls->second.size() == 0)
+                    _countersQueues.erase(leastFreqEls);
+                --_filled;
+            }
+            _keyToCounter[item] = 1;
+            _insertToQueues(1, item);
         } else {
             // нужно перенести в другую очередь
-            auto prevCounter = valCounter->second;
+            auto prevCounter = keyCounter->second;
             auto prevCounterQueue = _countersQueues.find(prevCounter);
             prevCounterQueue->second.erase(item);
             // пустой счетчик не нужен
             if (prevCounterQueue->second.size() == 0)
                 _countersQueues.erase(prevCounterQueue);
             _insertToQueues(prevCounter + 1, item);
-        }
-
-        // удалим самый поздний элемент из самого не частого счетчика
-        if (_filled > _capacity) {
-            auto leastFreqEls = _countersQueues.begin();
-            auto keyToErase = leastFreqEls->second.pop();
-            _counterMap.erase(keyToErase);
+            keyCounter->second++;
         }
     }
 
@@ -58,8 +61,13 @@ private:
         counterQueue->second.insert(item);
     }
 
+    template<typename KEY>
+    void _eraseKey(KEY &&item) {
+
+    }
+
     size_t _capacity;
     size_t _filled;
-    std::unordered_map<KeyType, size_t> _counterMap;
+    std::unordered_map<KeyType, size_t> _keyToCounter;
     std::map<size_t, LRUQueue<KeyType> > _countersQueues;
 };
