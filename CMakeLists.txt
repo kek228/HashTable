@@ -9,6 +9,11 @@ link_directories(${gtest_SOURCE_DIR}/build/lib)
 set(CMAKE_CXX_STANDARD 11)
 add_executable(test main.cpp HashTable.h)
 
-add_executable( UNIT_TESTS test.cpp HashTable.h)
-target_link_libraries(UNIT_TESTS gtest gtest_main)
-set_target_properties(UNIT_TESTS PROPERTIES CXX_STANDARD 11)
+add_executable( TEST_HASH testTable.cpp HashTable.h)
+add_executable( TEST_LFU testLFU.cpp LFU.h LRUQueue.h)
+
+target_link_libraries(TEST_HASH gtest gtest_main)
+set_target_properties(TEST_HASH PROPERTIES CXX_STANDARD 11)
+#
+target_link_libraries(TEST_LFU gtest gtest_main)
+set_target_properties(TEST_LFU PROPERTIES CXX_STANDARD 11)
