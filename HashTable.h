@@ -6,41 +6,31 @@
 
 template <typename KeyType, typename ValType>
 struct Entry{
-    enum class STATE{FREE, DEL, FILLED};
+    enum class STATE{FREE, FILLED};
 
-    Entry(): _key{}, _value{}, _state(STATE::FREE){}
+    Entry(): _key{}, _value{}, _free(true){}
 
-    Entry(const KeyType &key, const ValType &value, const STATE &state):
-            _key(key), _value(value), _state(state){}
+    Entry(const KeyType &key, const ValType &value, const bool free):
+            _key(key), _value(value), _free(free){}
 
 
     Entry& operator = (const Entry& entry){
         _key = entry._key;
         _value = entry._value;
-        _state = entry._state;
+        _free = entry._free;
         return *this;
     }
 
     Entry& operator = (Entry&& entry) noexcept {
         _key = entry._key;
         _value = entry._value;
-        _state = entry._state;
+        _free = entry._free;
         return *this;
-    }
-
-    bool free() const{
-        return _state == STATE::FREE;
-    }
-    bool deleted() const{
-        return _state == STATE::DEL;
-    }
-    bool filled() const{
-        return _state == STATE::FILLED;
     }
 
     KeyType _key;
     ValType _value;
-    STATE _state;
+    bool _free;
 };
 
 #define DEF_CAPACITY 2
@@ -65,14 +55,14 @@ public:
             _rehash();
         int iter = 0;
         int index = _hash(key, iter) % _capacity;
-        if(!_ithPos(index).filled()){
-            _ithPos(index) = {key, value, _Entry::STATE::FILLED};
+        if(_ithPos(index)._free){
+            _ithPos(index) = {key, value, false};
         }
         else {
-            while (_ithPos(index).filled()){
+            while (!_ithPos(index)._free){
                 index = _hash(key, ++iter) % _capacity;
             }
-            _ithPos(index) = {key, value, _Entry::STATE::FILLED};
+            _ithPos(index) = {key, value, false};
         }
         ++_filled;
     }
@@ -80,7 +70,7 @@ public:
     std::unique_ptr<ValType> get(const KeyType &key){
         size_t index = _search(key);
         const _Entry &entry =  _ithPos(index);
-        if(!entry.filled())
+        if(entry._free)
             return nullptr;
         std::unique_ptr<ValType> res(new ValType);
         *res = entry._value;
@@ -91,7 +81,7 @@ public:
         size_t index = _search(key);
         _Entry &entry =  _ithPos(index);
         if(entry.filled()){
-            entry._state = _Entry::STATE::DEL;
+            entry._free = true;
             --_filled;
         }
     }
@@ -101,9 +91,9 @@ private:
     size_t _search(const KeyType &key){
         int iter = 0;
         int index = _hash(key, iter) % _capacity;
-        if(_ithPos(index).free() || _ithPos(index)._key == key)
+        if(_ithPos(index)._free || _ithPos(index)._key == key)
             return index;
-        while(!_ithPos(index).free() && _ithPos(index)._key != key){
+        while(!_ithPos(index)._free && _ithPos(index)._key != key){
             index = _hash(key, ++iter) % _capacity;
         }
         return index;
@@ -118,14 +108,15 @@ private:
     }
 
     void _rehash(){
+        size_t _oldCapacity = _capacity;
         _capacity *= 2;
         _filled = 0;
         auto oldTable = std::move(_table);
         _table.reset(new _Entry[_capacity]);
 
-        for(size_t i = 0; i < _capacity; ++i){
+        for(size_t i = 0; i < _oldCapacity; ++i){
             const auto &oldVal = oldTable.get()[i];
-            if(oldVal.filled())
+            if(!oldVal._free)
                 insert(oldVal._key, oldVal._value);
         }
     }
