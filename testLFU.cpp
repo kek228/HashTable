@@ -7,7 +7,7 @@ using namespace std;
 
 
 TEST(LFUTests, trivial) {
-    LFUCache<string> lfu(2);
+    LFU<string> lfu(2);
     lfu.insert("aaa");
     auto keys = lfu.topKeys();
     ASSERT_EQ(keys.size(), 1);
@@ -33,7 +33,7 @@ TEST(LFUTests, trivial) {
 }
 //
 TEST(LFUTests, sameKeyTest) {
-    LFUCache<string> lfu(2);
+    LFU<string> lfu(2);
     lfu.insert("aaa");
     lfu.insert("aaa");
     lfu.insert("aaa");

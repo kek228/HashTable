@@ -1,14 +1,9 @@
 #pragma once
-
 #include <unordered_set>
 #include <memory>
 
 template<typename KeyType, typename ValType>
 struct Entry {
-    enum class STATE {
-        FREE, FILLED
-    };
-
     Entry() : _key{}, _value{}, _free(true) {}
 
     Entry(const KeyType &key, const ValType &value, const bool free) :
@@ -54,7 +49,7 @@ public:
         _table.reset(new _Entry[_capacity]);
     }
 
-    ~HashTable() = default;
+    virtual ~HashTable() = default;
 
     template<typename KEY, typename VAL>
     void insert(KEY &&key, VAL &&value) {
@@ -99,7 +94,6 @@ public:
     }
 
 private:
-
     template<typename KEY>
     size_t _search(KEY &&key) {
         int iter = 0;
@@ -135,8 +129,8 @@ private:
     }
 
 private:
+    size_t _capacity;
     const double _rehashFactor;
     size_t _filled;
-    size_t _capacity;
     std::unique_ptr<_Entry[]> _table;
 };

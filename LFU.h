@@ -1,16 +1,17 @@
 #pragma once
-
 #include <map>
 #include <unordered_map>
 #include <queue>
 #include "LRUQueue.h"
 
-template<typename KeyType>
-class LFUCache {
-public:
-    explicit LFUCache(const size_t capacity) : _capacity(capacity), _filled(0) {}
+#define DEF_LRU_CAPACITY 1024
 
-    ~LFUCache() = default;
+template<typename KeyType>
+class LFU {
+public:
+    explicit LFU(const size_t capacity) : _capacity(capacity), _filled(0) {}
+
+    ~LFU() = default;
 
     template<typename KEY>
     void insert(KEY &&item) {
