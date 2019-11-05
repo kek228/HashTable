@@ -4,14 +4,13 @@
 #include "LFU.h"
 
 template<typename KeyType, typename ValType>
-class HashTableWithAnalyser: public HashTable<KeyType, ValType>{
+class HashTableWithAnalyser : public HashTable<KeyType, ValType> {
 public:
-    explicit HashTableWithAnalyser( const size_t capacity = DEF_CAPACITY
-                                    , const double rehashFactor = DEF_REHASH_FACTOR
-                                    , const size_t cacheCapacity = DEF_LFU_CAPACITY) :
-                                    HashTableWithAnalyser::HashTable(capacity, rehashFactor)
-                                    , _keysCache(cacheCapacity)
-                                    {}
+    explicit HashTableWithAnalyser(const size_t capacity = DEF_CAPACITY, const double rehashFactor = DEF_REHASH_FACTOR,
+                                   const size_t cacheCapacity = DEF_LFU_CAPACITY) :
+            HashTableWithAnalyser::HashTable(capacity, rehashFactor), _keysCache(cacheCapacity) {}
+
+    virtual ~HashTableWithAnalyser() override = default;
 
     template<typename KEY, typename VAL>
     void insert(KEY &&key, VAL &&value) {

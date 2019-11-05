@@ -1,10 +1,18 @@
 #pragma once
+
 #include <map>
 #include <unordered_map>
 #include <queue>
 #include "LRUQueue.h"
 
 #define DEF_LFU_CAPACITY 1024
+
+
+template<typename KeyType>
+struct KeysWithFreq {
+    size_t counter;
+    std::vector<KeyType> keys;
+};
 
 template<typename KeyType>
 class LFU {
@@ -20,11 +28,11 @@ public:
             ++_filled;
             if (_filled > _capacity) {
                 // удалим самый поздний элемент из самого не частого счетчика
-                auto leastFreqEls = _countersQueues.begin();
-                auto keyToErase = leastFreqEls->second.pop();
-                _keyToCounter.erase(keyToErase);
-                if (leastFreqEls->second.size() == 0)
-                    _countersQueues.erase(leastFreqEls);
+                auto leastCounter = _countersQueues.begin();
+                KeyType leastFreqKey = leastCounter->second.pop();
+                _keyToCounter.erase(leastFreqKey);
+                if (leastCounter->second.size() == 0)
+                    _countersQueues.erase(leastCounter);
                 --_filled;
             }
             _keyToCounter[item] = 1;
@@ -42,13 +50,31 @@ public:
         }
     }
 
-    std::map<size_t, std::vector<KeyType> > topKeys() {
+    std::map<size_t, std::vector<KeyType> > allKeys() {
         std::map<size_t, std::vector<KeyType> > res;
         for (auto &it: _countersQueues) {
             res[it.first] = it.second.getItems();
         }
         return res;
     };
+
+    std::vector<KeysWithFreq<KeyType>> topKeys(int n) {
+        if (n <= 0)
+            return {};
+        std::vector<KeysWithFreq<KeyType>> res;
+        for (auto rit = _countersQueues.rbegin(); rit != _countersQueues.rend(); ++rit) {
+            res.push_back({rit->first, {}});
+            auto items = rit->second.getItems();
+            for (auto &i: items) {
+                res.back().keys.push_back(i);
+                --n;
+                if (n == 0) {
+                    return res;
+                }
+            }
+        }
+        return res;
+    }
 
 private:
     template<typename KEY>
