@@ -30,6 +30,15 @@ public:
         HashTableWithAnalyser::HashTable.erase(key);
     }
 
+    std::map<size_t, std::vector<KeyType> > allKeys() {
+        return _keysCache.allKeys();
+    }
+
+    std::vector<KeysWithFreq<KeyType>> topKeys(const int n) {
+        return _keysCache.topKeys(n);
+    }
+
+
 private:
     LFU<KeyType> _keysCache;
 };

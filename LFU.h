@@ -10,6 +10,7 @@
 
 template<typename KeyType>
 struct KeysWithFreq {
+
     size_t counter;
     std::vector<KeyType> keys;
 };
@@ -50,7 +51,7 @@ public:
         }
     }
 
-    std::map<size_t, std::vector<KeyType> > allKeys() {
+    std::map<size_t, std::vector<KeyType>> allKeys() {
         std::map<size_t, std::vector<KeyType> > res;
         for (auto &it: _countersQueues) {
             res[it.first] = it.second.getItems();
