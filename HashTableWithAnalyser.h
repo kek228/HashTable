@@ -19,7 +19,7 @@ public:
     }
 
     template<typename KEY>
-    std::unique_ptr<ValType> get(KEY &&key) {
+    typename HashTable<KeyType, ValType>::_Entry get(KEY &&key) {
         _keysCache.insert(key);
         return HashTableWithAnalyser::HashTable.get(key);
     }

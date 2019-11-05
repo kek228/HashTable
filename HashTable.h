@@ -82,16 +82,14 @@ public:
     }
 
     template<typename KEY>
-    std::unique_ptr<ValType> get(KEY &&key) {
+    _Entry* get(KEY &&key) {
         size_t iter = 0;
         size_t index = _hash(key, iter) % _capacity;
         while(!_ithPos(index).empty()){
             if(_ithPos(index)._key == key){
                 if(_ithPos(index).deleted())
                     return nullptr;
-                std::unique_ptr<ValType> res(new ValType);
-                *res = _ithPos(index)._value;
-                return res;
+                return _table.get() + index;
             }
             index = _hash(key, ++iter) % _capacity;
         }

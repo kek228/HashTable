@@ -10,14 +10,14 @@ TEST(HashTableTests, trivialInt) {
     testTable.insert(1, 1);
     testTable.insert(2, 2);
     auto res = testTable.get(1);
-    ASSERT_EQ(*res, 1);
+    ASSERT_EQ(res->_value, 1);
     //
     res = testTable.get(3);
     ASSERT_EQ(res, nullptr);
     //
     testTable.insert(2, 1);
     res = testTable.get(2);
-    ASSERT_EQ(*res, 1);
+    ASSERT_EQ(res->_value, 1);
     //
     testTable.erase(2);
     res = testTable.get(2);
@@ -46,7 +46,7 @@ TEST(HashTableTests, trivial) {
 
     for (auto &str: testStrings) {
         auto val = testTable.get(str);
-        ASSERT_EQ(str, *val);
+        ASSERT_EQ(str, val->_value);
     }
 }
 
@@ -82,7 +82,7 @@ TEST(HashTableTests, delTest) {
         if (str == "ccccccc" || str == "ggggggg")
             ASSERT_EQ(val, nullptr);
         else {
-            ASSERT_EQ(str, *val);
+            ASSERT_EQ(str, val->_value);
         }
     }
 }
